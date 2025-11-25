@@ -49,17 +49,32 @@
 
 \section{课题背景与目标}
 
-\subsection{项目背景}
-\begin{frame}{项目背景}
-    \begin{itemize}[<+-| alert@+>]
-        \item 智慧安防、智能医疗等场景迫切需要准确的多模态行为理解能力。
-        \item 现有方案在跨场景泛化和轻量部署方面表现不足，缺乏可解释的融合策略。
-        \item XMU 航空航天学院承担的纵向项目要求在 2024 年底前完成核心算法的工程化验证。
+\subsection{行业动机}
+\begin{frame}{课题背景：行业动机}
+    \begin{itemize}
+        \item 智慧安防、智能医疗等应用场景需要可靠的行为理解能力。
+        \item 多模态识别能够综合不同传感器的信息，提高对复杂行为的捕捉能力。
     \end{itemize}
 \end{frame}
 
-\subsection{研究目标与指标}
-\begin{frame}{研究目标与指标}
+\subsection{当前痛点}
+\begin{frame}{课题背景：当前痛点}
+    \begin{itemize}
+        \item 现有方案在跨场景泛化和轻量部署方面表现不足。
+        \item 模型缺乏可解释且鲁棒的特征融合策略，难以适应真实业务。
+    \end{itemize}
+\end{frame}
+
+\subsection{项目要求}
+\begin{frame}{课题背景：项目要求}
+    \begin{itemize}
+        \item XMU 航空航天学院承担的纵向项目要求在 2024 年底前完成核心算法的工程化验证。
+        \item 需同步考虑算法指标、部署效率与软硬件协同，形成可落地方案。
+    \end{itemize}
+\end{frame}
+
+\subsection{阶段目标}
+\begin{frame}{研究目标：阶段目标}
     \begin{block}{阶段目标}
         \begin{itemize}
             \item 构建覆盖视觉、语音、惯导传感的多模态数据集与基准管线。
@@ -67,10 +82,14 @@
             \item 打通端到端推理流程，实现 30 FPS 以上的实时识别能力。
         \end{itemize}
     \end{block}
+\end{frame}
+
+\subsection{评估指标}
+\begin{frame}{研究目标：评估指标}
     \begin{exampleblock}{评估指标}
         \begin{itemize}
             \item 精度：Top-1 准确率 $\geq 88\%$，F1-score $\geq 0.85$。
-            \item 性能：推理延迟 $\leq 33ms$，模型大小 $\leq 120$ MB。
+            \item 性能：推理延迟 $\leq 33\text{ ms}$，模型大小 $\leq 120$ MB。
             \item 部署：支持 Jetson Orin 与 X86 GPU 的双平台运行。
         \end{itemize}
     \end{exampleblock}
