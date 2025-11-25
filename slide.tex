@@ -1,0 +1,252 @@
+\documentclass{beamer}
+\usepackage{ctex, hyperref}
+\usepackage[T1]{fontenc}
+
+% other packages
+\usepackage{latexsym,amsmath,xcolor,multicol,booktabs,calligra}
+\usepackage{graphicx,pstricks,listings,stackengine}
+
+\author{张鹏}
+\title{组会汇报}
+\subtitle{\today}
+\institute{厦门大学航空航天学院}
+\date{}
+\usepackage{XMU}
+
+% defs
+\def\cmd#1{\texttt{\color{red}\footnotesize $\backslash$#1}}
+\def\env#1{\texttt{\color{blue}\footnotesize #1}}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{halfgray}{gray}{0.55}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{deepblue},
+    emphstyle=\ttfamily\color{deepred},
+    stringstyle=\color{deepgreen},
+    numbers=left,
+    numberstyle=\small\color{halfgray},
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    frame=shadowbox,
+}
+
+\begin{document}
+
+\kaishu
+\begin{frame}
+    \titlepage
+    \begin{figure}[htpb]
+        \centering
+        \includegraphics[width=0.25\linewidth]{pic/xmu-logo.pdf}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \tableofcontents[sectionstyle=show,subsectionstyle=show/shaded/hide,subsubsectionstyle=show/shaded/hide]
+\end{frame}
+
+\section{课题背景与目标}
+
+\subsection{项目背景}
+\begin{frame}{项目背景}
+    \begin{itemize}[<+-| alert@+>]
+        \item 智慧安防、智能医疗等场景迫切需要准确的多模态行为理解能力。
+        \item 现有方案在跨场景泛化和轻量部署方面表现不足，缺乏可解释的融合策略。
+        \item XMU 航空航天学院承担的纵向项目要求在 2024 年底前完成核心算法的工程化验证。
+    \end{itemize}
+\end{frame}
+
+\subsection{研究目标与指标}
+\begin{frame}{研究目标与指标}
+    \begin{block}{阶段目标}
+        \begin{itemize}
+            \item 构建覆盖视觉、语音、惯导传感的多模态数据集与基准管线。
+            \item 设计鲁棒的表征学习与跨模态对齐策略，支撑复杂行为识别。
+            \item 打通端到端推理流程，实现 30 FPS 以上的实时识别能力。
+        \end{itemize}
+    \end{block}
+    \begin{exampleblock}{评估指标}
+        \begin{itemize}
+            \item 精度：Top-1 准确率 $\geq 88\%$，F1-score $\geq 0.85$。
+            \item 性能：推理延迟 $\leq 33ms$，模型大小 $\leq 120$ MB。
+            \item 部署：支持 Jetson Orin 与 X86 GPU 的双平台运行。
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+\section{数据与方法}
+
+\subsection{数据来源与采集}
+\begin{frame}{数据来源与采集}
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{lccc}
+            \toprule
+            数据模态 & 采集频率 & 样本量 & 备注 \\\midrule
+            RGB 视频 & 30 FPS & 1\,200 Clips & 室内/户外混合 \\
+            IMU 传感 & 200 Hz & 3\,600 序列 & 穿戴式采集 \\
+            音频 & 16 kHz & 1\,800 片段 & 附带噪声标签 \\\bottomrule
+        \end{tabular}
+        \caption{本阶段已完成的数据采集与清洗情况}
+    \end{table}
+    \begin{itemize}
+        \item 数据标注采用三人交叉审核机制，保障事件级别一致性。
+        \item 通过自动脚本生成时间戳对齐文件，方便后续融合。
+    \end{itemize}
+\end{frame}
+
+\subsection{系统方案概览}
+\begin{frame}{系统方案概览}
+    \begin{columns}
+        \column{0.55\textwidth}
+        \begin{itemize}
+            \item 视觉分支：基于 Video Swin Transformer，支持剪枝与蒸馏。
+            \item 语音分支：采用 Conformer 编码器，与视觉特征共享注意力。
+            \item 传感器分支：轻量级 TCN，强调时间依赖建模。
+            \item 融合策略：多尺度对齐 + 动态门控融合，配合多任务损失。
+        \end{itemize}
+        \column{0.4\textwidth}
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{pic/dtmf.pdf}
+            \caption{流程示意：数据同步 $\rightarrow$ 特征提取 $\rightarrow$ 跨模态融合 $\rightarrow$ 行为预测}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\section{实验设计与结果}
+
+\subsection{实验设置}
+\begin{frame}{实验设置}
+    \begin{itemize}
+        \item 训练环境：8 $\times$ A100，AdamW 优化器，Cosine 学习率，batch=64。
+        \item 数据增强：视觉使用 RandAugment+Mixup，音频使用 SpecAugment，IMU 使用抖动/裁剪。
+        \item 评价协议：5 折交叉验证 + 跨场景留一验证，确保泛化性。
+        \item 发布两条对照实验：单模态基线、全模态融合。
+    \end{itemize}
+\end{frame}
+
+\subsection{性能对比}
+\begin{frame}{性能对比}
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{lccc}
+            \toprule
+            方法 & Top-1(\%) & F1-score & 时延(ms) \\\midrule
+            视觉单模态 & 80.6 & 0.74 & 21.3 \\
+            语音+IMU & 82.1 & 0.77 & 18.9 \\
+            全模态融合（当前） & \textbf{87.9} & \textbf{0.84} & 28.5 \\
+            目标（2024Q4） & 88.0+ & 0.85+ & 33 以下\\\bottomrule
+        \end{tabular}
+        \caption{关键结果对比，融合模型已逼近项目考核指标}
+    \end{table}
+    \begin{itemize}
+        \item 视觉分支限制了总体表现，后续需进一步蒸馏与剪枝。
+        \item 推理延迟仍受多模态对齐开销影响，需要算子优化。
+    \end{itemize}
+\end{frame}
+
+\subsection{可视化与案例}
+\begin{frame}{可视化与案例}
+    \begin{columns}
+        \column{0.45\textwidth}
+        \begin{block}{典型案例}
+            \begin{itemize}
+                \item 多人协同：融合模型在“交接物品”场景准确率提升 12\%.
+                \item 异常行为：通过 IMU 通道捕获微动信息，降低误报。
+                \item 噪声环境：语音分支结合噪声标签提升鲁棒性。
+            \end{itemize}
+        \end{block}
+        \column{0.45\textwidth}
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{pic/xmu-logo.pdf}
+            \caption{示意：可根据实际需求替换为行为可视化截图}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\section{问题与讨论}
+
+\subsection{挑战与风险}
+\begin{frame}{挑战与风险}
+    \begin{itemize}
+        \item \textbf{数据问题}：户外场景样本不足，需补采夜间与极端光照数据。
+        \item \textbf{算法问题}：跨模态对齐仍然依赖手工超参，自动调度策略缺失。
+        \item \textbf{工程问题}：Jetson 端推理频率不稳定，TensorRT 插件仍需优化。
+        \item \textbf{协同问题}：生态合作方接口迟迟未定，影响整合测试。
+    \end{itemize}
+\end{frame}
+
+\subsection{讨论要点}
+\begin{frame}{讨论要点}
+    \begin{columns}
+        \column{0.48\textwidth}
+        \begin{block}{需要决策}
+            \begin{itemize}
+                \item 是否投入额外预算扩充夜间采集？
+                \item 模型蒸馏优先支持视觉还是 IMU 分支？
+                \item 平台优化优先 Jetson 还是 X86？
+            \end{itemize}
+        \end{block}
+        \column{0.48\textwidth}
+        \begin{exampleblock}{拟定支持}
+            \begin{itemize}
+                \item 申请学院 GPU 集群的额外夜间使用时段。
+                \item 与合作院校共享噪声标注工具链。
+                \item 争取工程团队协助推理框架合并。
+            \end{itemize}
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+\section{下一步计划}
+
+\subsection{里程碑安排}
+\begin{frame}{里程碑安排}
+    \begin{itemize}
+        \item 6 月：完成夜间与极端场景数据补采，固化清洗规范。
+        \item 7 月：实现跨模态自适应对齐模块，完成蒸馏实验。
+        \item 8 月：交付 Jetson 优化版本，时延压缩到 25 ms 以内。
+        \item 9 月：联合生态合作方开展系统联调和用户测试。
+        \item 10-11 月：撰写论文与技术报告，准备验收材料。
+    \end{itemize}
+\end{frame}
+
+\subsection{本周行动项}
+\begin{frame}{本周行动项}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item 数据组：推进夜间场景采集脚本开发。
+            \item 算法组：完成多模态门控网络初版上线。
+            \item 工程组：定位 TensorRT 插件的内存泄漏。
+        \end{itemize}
+        \column{0.45\textwidth}
+        \begin{block}{风险缓解}
+            \begin{itemize}
+                \item 预留 2 天回归窗口验证性能波动。
+                \item 维护实验记录与配置，避免重现实验困难。
+            \end{itemize}
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\section{参考文献}
+
+\subsection{参考文献}
+\begin{frame}[allowframebreaks]
+    \bibliography{ref}
+    \bibliographystyle{xmu}
+\end{frame}
+
+\section*{致谢}
+\begin{frame}
+    \begin{center}
+        {\Huge\calligra Thanks!}
+    \end{center}
+\end{frame}
+
+\end{document}
